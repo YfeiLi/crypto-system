@@ -1,0 +1,14 @@
+server:
+  port: 1000
+
+spring:
+  profiles:
+    active: dev
+  application:
+    name: crypto-system
+
+#mybatis-plus配置
+mybatis-plus:
+  #xml地址
+  mapper-locations:
+    - classpath*:mapper/*.xml
