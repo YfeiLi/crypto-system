@@ -136,7 +136,6 @@ public class ApiSdkReadService {
      */
     private WsSdkDetail convertToWsSdkDetail(ApiSdk apiSdk, WsSdkConfig wsSdkConfig) {
         WsSdkDetail sdkDetail = converter.toWsDetail(apiSdk);
-        sdkDetail.setMultiConnect(wsSdkConfig.getMultiConnect());
         sdkDetail.setNeedPath(wsSdkConfig.getNeedPath());
         sdkDetail.setNeedEvent(wsSdkConfig.getNeedEvent());
         sdkDetail.setSubscribeHandlerScriptId(wsSdkConfig.getSubscribeHandlerScriptId());

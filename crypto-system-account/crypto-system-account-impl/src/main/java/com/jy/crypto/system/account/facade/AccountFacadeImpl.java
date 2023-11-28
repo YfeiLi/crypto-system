@@ -1,6 +1,6 @@
 package com.jy.crypto.system.account.facade;
 
-import com.jy.crypto.system.account.service.AccountGroupService;
+import com.jy.crypto.system.account.facade.dto.AccountDto;
 import com.jy.crypto.system.account.service.AccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -11,5 +11,8 @@ public class AccountFacadeImpl implements AccountFacade {
 
     private final AccountService accountService;
 
-    private final AccountGroupService accountGroupService;
+    @Override
+    public AccountDto getById(Long id) {
+        return accountService.getById(id);
+    }
 }

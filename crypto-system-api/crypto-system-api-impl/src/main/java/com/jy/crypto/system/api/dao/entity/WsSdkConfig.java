@@ -9,7 +9,6 @@ public class WsSdkConfig {
     @TableId(type = IdType.INPUT)
     private Long id;
     private String sdkCode;
-    private Boolean multiConnect;
     private Boolean needPath;
     private Boolean needEvent;
     // 订阅处理脚本

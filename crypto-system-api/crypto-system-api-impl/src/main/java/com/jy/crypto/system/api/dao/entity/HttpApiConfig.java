@@ -1,7 +1,9 @@
 package com.jy.crypto.system.api.dao.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import com.jy.crypto.system.api.facade.enums.HttpMethod;
 import lombok.Data;
 
@@ -12,4 +14,7 @@ public class HttpApiConfig {
     private String apiCode;
     private String path;
     private HttpMethod method;
+    private Long cacheMills;
+    @TableField(typeHandler = JacksonTypeHandler.class)
+    private String[] ignoreCacheHitParams;
 }

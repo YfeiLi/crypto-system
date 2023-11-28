@@ -15,8 +15,8 @@ public class ApiFacadeImpl implements ApiFacade {
     private final ApiInvokeService apiInvokeService;
 
     @Override
-    public HttpResult invokeHttp(String apiCode, Map<String, Object> params) {
-        return apiInvokeService.invokeHttp(apiCode, params);
+    public HttpResult invokeHttp(String apiCode, Long accountId, Map<String, Object> params) {
+        return apiInvokeService.invokeHttp(apiCode, accountId, params);
     }
 
     @Override

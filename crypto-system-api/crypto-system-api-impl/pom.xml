@@ -25,6 +25,11 @@
         </dependency>
         <dependency>
             <groupId>com.jy</groupId>
+            <artifactId>crypto-system-account-facade</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.jy</groupId>
             <artifactId>crypto-system-script-facade</artifactId>
             <version>${project.version}</version>
         </dependency>

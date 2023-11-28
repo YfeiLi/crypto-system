@@ -8,7 +8,6 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class WsSdkDetail extends ApiSdkListItem {
-    private Boolean multiConnect;
     private Boolean needPath;
     private Boolean needEvent;
     // 订阅处理脚本

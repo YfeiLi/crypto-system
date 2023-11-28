@@ -10,7 +10,7 @@ public interface ApiFacade {
     /**
      * 调用http api
      */
-    HttpResult invokeHttp(String apiCode, Map<String, Object> params);
+    HttpResult invokeHttp(String apiCode, Long accountId, Map<String, Object> params);
 
     /**
      * 订阅 websocket

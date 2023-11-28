@@ -26,6 +26,11 @@
         </dependency>
         <dependency>
             <groupId>com.jy</groupId>
+            <artifactId>crypto-system-script-impl</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.jy</groupId>
             <artifactId>crypto-system-api-impl</artifactId>
             <version>${project.version}</version>
         </dependency>
