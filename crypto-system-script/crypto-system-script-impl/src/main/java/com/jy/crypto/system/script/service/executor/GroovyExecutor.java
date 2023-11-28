@@ -17,4 +17,14 @@ public class GroovyExecutor {
         GroovyShell shell = new GroovyShell(binding);
         return shell.evaluate(script);
     }
+
+    public static void main(String[] args) {
+        GroovyExecutor executor = new GroovyExecutor();
+        String script = """
+                return [a: 1, b: 2]
+        """;
+        Map<?, ?> result = (Map<?, ?>) executor.execute(script, Map.of("a", 1));
+        Integer a = (Integer) result.get("a");
+        System.out.println(a);
+    }
 }

@@ -81,10 +81,10 @@ public class HttpApiClient {
         if (sdkClient == null) {
             throw new BusinessException(ErrorCode.DATA_NOT_FOUND, "sdk(code=" + apiDetail.getSdkCode() + ")");
         }
-        // 调用sdk
+        // 调用sdk client
         HttpResult httpResult = sdkClient.invoke(apiDetail, params, account);
         // 插入缓存
-        if (apiDetail.getCacheMills() != null && apiDetail.getCacheMills() != 0) {
+        if (httpResult.getSuccess() && apiDetail.getCacheMills() != null && apiDetail.getCacheMills() != 0) {
             HttpCache.set(code, accountId, params,
                     apiDetail.getCacheMills(), apiDetail.getIgnoreCacheHitParams(), httpResult);
         }
