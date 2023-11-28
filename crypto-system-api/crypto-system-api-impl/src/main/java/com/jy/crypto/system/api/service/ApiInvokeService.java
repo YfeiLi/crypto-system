@@ -1,11 +1,11 @@
 package com.jy.crypto.system.api.service;
 
-import com.jy.crypto.system.api.dto.HttpApiDetail;
-import com.jy.crypto.system.api.dto.WsApiDetail;
 import com.jy.crypto.system.api.facade.dto.HttpResult;
 import com.jy.crypto.system.api.service.client.http.HttpApiClient;
 import com.jy.crypto.system.api.service.client.ws.WsApiClient;
+import com.jy.crypto.system.infrastructure.utils.JacksonHelper;
 import lombok.RequiredArgsConstructor;
+import okhttp3.Request;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;

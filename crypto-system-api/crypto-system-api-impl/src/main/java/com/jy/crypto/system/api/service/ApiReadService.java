@@ -22,6 +22,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -64,7 +65,7 @@ public class ApiReadService {
         detail.setPath(httpApiConfig.getPath());
         detail.setMethod(httpApiConfig.getMethod());
         detail.setParamList(paramList.stream()
-                .map(converter::toHttpDetailParam)
+                .map(converter::toDto)
                 .collect(Collectors.toList()));
         return detail;
     }
@@ -88,7 +89,7 @@ public class ApiReadService {
         detail.setPath(wsApiConfig.getPath());
         detail.setEvent(wsApiConfig.getEvent());
         detail.setParamList(paramList.stream()
-                .map(converter::toHttpDetailParam)
+                .map(converter::toDto)
                 .collect(Collectors.toList()));
         return detail;
     }

@@ -1,5 +1,5 @@
 package com.jy.crypto.system.api.facade.enums;
 
-public enum HttpParamType {
+public enum ParamType {
     STR, NUM, BOOL
 }

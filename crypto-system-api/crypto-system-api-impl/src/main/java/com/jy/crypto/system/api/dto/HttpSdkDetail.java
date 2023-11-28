@@ -8,6 +8,6 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class HttpSdkDetail extends ApiSdkListItem {
-    private String beforeHandler;
-    private String afterHandler;
+    private Long requestHandlerScriptId;
+    private Long responseHandlerScriptId;
 }

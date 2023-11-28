@@ -1,6 +1,6 @@
 package com.jy.crypto.system.api.dto;
 
-import com.jy.crypto.system.api.facade.enums.HttpParamType;
+import com.jy.crypto.system.api.facade.enums.ParamType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -13,13 +13,5 @@ import java.util.List;
 public class WsApiDetail extends ApiListItem {
     private String path;
     private String event;
-    private List<HttpApiDetail.Param> paramList;
-
-    @Data
-    public static class Param {
-        private String name;
-        private Boolean required;
-        private HttpParamType type;
-        private Integer lengthLimit;
-    }
+    private List<ApiParamDto> paramList;
 }

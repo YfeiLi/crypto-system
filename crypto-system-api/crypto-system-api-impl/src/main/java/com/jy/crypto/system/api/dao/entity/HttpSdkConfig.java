@@ -9,8 +9,8 @@ public class HttpSdkConfig {
     @TableId(type = IdType.INPUT)
     private Long id;
     private String sdkCode;
-    // 前置处理器，groovy代码
-    private String beforeHandler;
-    // 后置处理器，groovy代码
-    private String afterHandler;
+    // 请求处理脚本
+    private Long requestHandlerScriptId;
+    // 响应处理脚本
+    private Long responseHandlerScriptId;
 }

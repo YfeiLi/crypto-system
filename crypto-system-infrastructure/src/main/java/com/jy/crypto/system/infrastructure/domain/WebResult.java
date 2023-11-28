@@ -1,6 +1,5 @@
 package com.jy.crypto.system.infrastructure.domain;
 
-import com.jy.crypto.system.infrastructure.exception.ErrorCode;
 import lombok.Data;
 
 @Data

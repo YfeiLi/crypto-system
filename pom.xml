@@ -18,6 +18,7 @@
         <module>crypto-system-user</module>
         <module>crypto-system-main</module>
         <module>crypto-system-infrastructure</module>
+        <module>crypto-system-script</module>
     </modules>
 
     <properties>

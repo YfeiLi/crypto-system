@@ -17,6 +17,7 @@ import com.jy.crypto.system.api.facade.enums.ApiType;
 import com.jy.crypto.system.infrastructure.exception.BusinessException;
 import com.jy.crypto.system.infrastructure.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 /**
  * Api Sdk增删查改服务
  */
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class ApiSdkReadService {
@@ -74,7 +76,10 @@ public class ApiSdkReadService {
             configList.stream()
                     .filter(item -> item.getId().equals(apiSdk.getId()))
                     .findFirst()
-                    .ifPresent(config -> detailList.add(covertToHttpSdkDetail(apiSdk, config)));
+                    .ifPresentOrElse(
+                            config -> detailList.add(covertToHttpSdkDetail(apiSdk, config)),
+                            () -> log.warn("sdk config(code=" + apiSdk.getCode() + ") not found")
+                    );
         }
         return detailList;
     }
@@ -84,8 +89,8 @@ public class ApiSdkReadService {
      */
     private HttpSdkDetail covertToHttpSdkDetail(ApiSdk apiSdk, HttpSdkConfig sdkConfig) {
         HttpSdkDetail detail = converter.toHttpDetail(apiSdk);
-        detail.setBeforeHandler(sdkConfig.getBeforeHandler());
-        detail.setAfterHandler(sdkConfig.getAfterHandler());
+        detail.setRequestHandlerScriptId(sdkConfig.getRequestHandlerScriptId());
+        detail.setResponseHandlerScriptId(sdkConfig.getResponseHandlerScriptId());
         return detail;
     }
 
@@ -134,9 +139,9 @@ public class ApiSdkReadService {
         sdkDetail.setMultiConnect(wsSdkConfig.getMultiConnect());
         sdkDetail.setNeedPath(wsSdkConfig.getNeedPath());
         sdkDetail.setNeedEvent(wsSdkConfig.getNeedEvent());
-        sdkDetail.setSubscribeHandler(wsSdkConfig.getSubscribeHandler());
-        sdkDetail.setUnsubscribeHandler(wsSdkConfig.getUnsubscribeHandler());
-        sdkDetail.setReceiveHandler(wsSdkConfig.getReceiveHandler());
+        sdkDetail.setSubscribeHandlerScriptId(wsSdkConfig.getSubscribeHandlerScriptId());
+        sdkDetail.setUnsubscribeHandlerScriptId(wsSdkConfig.getSubscribeHandlerScriptId());
+        sdkDetail.setReceiveHandlerScriptId(wsSdkConfig.getReceiveHandlerScriptId());
         return sdkDetail;
     }
 }

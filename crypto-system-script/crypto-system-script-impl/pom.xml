@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.jy</groupId>
-        <artifactId>crypto-system-api</artifactId>
+        <artifactId>crypto-system-script</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>crypto-system-api-impl</artifactId>
+    <artifactId>crypto-system-script-impl</artifactId>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -18,11 +18,6 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>com.jy</groupId>
-            <artifactId>crypto-system-api-facade</artifactId>
-            <version>${project.version}</version>
-        </dependency>
         <dependency>
             <groupId>com.jy</groupId>
             <artifactId>crypto-system-script-facade</artifactId>
@@ -35,12 +30,8 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>okhttp</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-websocket</artifactId>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy</artifactId>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>

@@ -1,7 +1,7 @@
 package com.jy.crypto.system.api.dto;
 
 import com.jy.crypto.system.api.facade.enums.HttpMethod;
-import com.jy.crypto.system.api.facade.enums.HttpParamType;
+import com.jy.crypto.system.api.facade.enums.ParamType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -14,13 +14,5 @@ import java.util.List;
 public class HttpApiDetail extends ApiListItem {
     private String path;
     private HttpMethod method;
-    private List<Param> paramList;
-
-    @Data
-    public static class Param {
-        private String name;
-        private Boolean required;
-        private HttpParamType type;
-        private Integer lengthLimit;
-    }
+    private List<ApiParamDto> paramList;
 }
