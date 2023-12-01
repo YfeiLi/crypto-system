@@ -16,4 +16,8 @@ public class HttpApiDetail extends ApiListItem {
     private Long cacheMills;
     private String[] ignoreCacheHitParams;
     private List<ApiParamDto> paramList;
+
+    public Boolean isCache() {
+        return cacheMills != null && cacheMills > 0;
+    }
 }

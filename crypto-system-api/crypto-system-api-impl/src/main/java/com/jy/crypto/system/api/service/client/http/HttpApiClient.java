@@ -16,10 +16,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -32,6 +36,7 @@ public class HttpApiClient {
     private final ApiReadService apiReadService;
     private final ApiSdkReadService apiSdkReadService;
     private final AccountFacade accountFacade;
+    private final HttpCache httpCache;
 
     /**
      * 初始化sdk
@@ -50,6 +55,44 @@ public class HttpApiClient {
     public HttpResult invoke(String code, Long accountId, Map<String, Object> params) {
         // 获取api详情
         HttpApiDetail apiDetail = apiReadService.getHttpApiDetail(code);
+        // 忽略不参与缓存的参数
+        Map<String, Object> paramsForCache = new HashMap<>(params);
+        if (apiDetail.getIgnoreCacheHitParams() != null) {
+            paramsForCache.entrySet().removeIf(entry ->
+                    Arrays.stream(apiDetail.getIgnoreCacheHitParams()).anyMatch(key -> key.equals(entry.getKey())));
+        }
+        Future<HttpResult> future = null;
+        // 检查缓存
+        if (apiDetail.isCache()) {
+            future = httpCache.get(code, accountId, paramsForCache);
+        }
+        if (future == null) {
+            // 调用具体实现
+            future = CompletableFuture.supplyAsync(() -> invokeImpl(apiDetail, accountId, params));
+            // 设置缓存
+            if (apiDetail.isCache()) {
+                httpCache.set(code, accountId, paramsForCache, future, apiDetail.getCacheMills());
+            }
+        }
+        // 返回结果，处理Future异常
+        try {
+            return future.get();
+        } catch (InterruptedException e) {
+            throw new BusinessException(ErrorCode.API_INVOKE_ERROR, e, code);
+        } catch (ExecutionException e) {
+            if (e.getCause() instanceof BusinessException businessException) {
+                throw businessException;
+            } else {
+                throw new BusinessException(ErrorCode.API_INVOKE_ERROR, e, code);
+            }
+        }
+    }
+
+    /**
+     * 请求api具体实现
+     */
+    private HttpResult invokeImpl(HttpApiDetail apiDetail, Long accountId, Map<String, Object> params) {
+        String code = apiDetail.getCode();
         // 校验参数
         Map<String, String> paramErrors = new HashMap<>();
         for (ApiParamDto apiParamDto : apiDetail.getParamList()) {
@@ -58,11 +101,6 @@ public class HttpApiClient {
         }
         if (paramErrors.size() > 0) {
             throw new BusinessException(ErrorCode.PARAM_ERROR, paramErrors);
-        }
-        // 检查缓存
-        HttpResult cache = HttpCache.get(code, accountId, params);
-        if (cache != null) {
-            return cache;
         }
         // 获取账户详情
         AccountDto account = null;
@@ -82,13 +120,7 @@ public class HttpApiClient {
             throw new BusinessException(ErrorCode.DATA_NOT_FOUND, "sdk(code=" + apiDetail.getSdkCode() + ")");
         }
         // 调用sdk client
-        HttpResult httpResult = sdkClient.invoke(apiDetail, params, account);
-        // 插入缓存
-        if (httpResult.getSuccess() && apiDetail.getCacheMills() != null && apiDetail.getCacheMills() != 0) {
-            HttpCache.set(code, accountId, params,
-                    apiDetail.getCacheMills(), apiDetail.getIgnoreCacheHitParams(), httpResult);
-        }
-        return httpResult;
+        return sdkClient.invoke(apiDetail, params, account);
     }
 
     /**

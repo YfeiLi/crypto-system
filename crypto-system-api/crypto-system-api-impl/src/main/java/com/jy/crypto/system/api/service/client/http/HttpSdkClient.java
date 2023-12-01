@@ -9,7 +9,6 @@ import com.jy.crypto.system.infrastructure.exception.BusinessException;
 import com.jy.crypto.system.infrastructure.exception.ErrorCode;
 import com.jy.crypto.system.script.facade.ScriptFacade;
 import okhttp3.*;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -29,7 +28,10 @@ public class HttpSdkClient {
 
     public HttpSdkClient(HttpSdkDetail sdkDetail) {
         this.sdkDetail = sdkDetail;
-        this.okHttpClient = customizedOkHttpClient(commonOkHttpClientBuild(), sdkDetail);
+        OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder();
+        commonOkHttpClientBuild(clientBuilder);
+        customizedOkHttpClient(clientBuilder, sdkDetail);
+        this.okHttpClient = clientBuilder.build();
     }
 
     @Autowired
@@ -40,8 +42,8 @@ public class HttpSdkClient {
     public HttpResult invoke(HttpApiDetail apiDetail, Map<String, Object> params, AccountDto account) {
         // 调用脚本获取请求
         Map<String, Object> requestHandlerVariables = new HashMap<>();
-        requestHandlerVariables.put("apiDetail", apiDetail);
-        requestHandlerVariables.put("sdkDetail", sdkDetail);
+        requestHandlerVariables.put("api", apiDetail);
+        requestHandlerVariables.put("sdk", sdkDetail);
         requestHandlerVariables.put("account", account);
         requestHandlerVariables.put("params", params);
         Object requestHandlerResult = scriptFacade.execute(sdkDetail.getRequestHandlerScriptId(), requestHandlerVariables);
@@ -50,8 +52,8 @@ public class HttpSdkClient {
         try (Response response = okHttpClient.newCall(request).execute()) {
             // 调用脚本获取结果
             Map<String, Object> responseHandlerVariables = new HashMap<>();
-            responseHandlerVariables.put("apiDetail", apiDetail);
-            responseHandlerVariables.put("sdkDetail", sdkDetail);
+            responseHandlerVariables.put("api", apiDetail);
+            responseHandlerVariables.put("sdk", sdkDetail);
             responseHandlerVariables.put("account", account);
             responseHandlerVariables.put("params", params);
             responseHandlerVariables.put("response", response);
@@ -65,20 +67,18 @@ public class HttpSdkClient {
     /**
      * OkHttpClient公共配置
      */
-    private OkHttpClient.Builder commonOkHttpClientBuild() {
-        return new OkHttpClient.Builder()
-                .callTimeout(Duration.ofSeconds(10))
+    private void commonOkHttpClientBuild(OkHttpClient.Builder builder) {
+        builder.callTimeout(Duration.ofSeconds(10))
                 .retryOnConnectionFailure(true);
     }
 
     /**
      * 根据sdk配置OkHttpClient
      */
-    private OkHttpClient customizedOkHttpClient(OkHttpClient.Builder builder, HttpSdkDetail sdkDetail) {
+    private void customizedOkHttpClient(OkHttpClient.Builder builder, HttpSdkDetail sdkDetail) {
         if (sdkDetail.getTimeout() != null && sdkDetail.getTimeout() != 0) {
             builder.callTimeout(Duration.ofSeconds(sdkDetail.getTimeout()));
         }
-        return builder.build();
     }
 
     /**

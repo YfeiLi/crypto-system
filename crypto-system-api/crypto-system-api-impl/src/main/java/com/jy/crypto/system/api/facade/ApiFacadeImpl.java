@@ -20,8 +20,8 @@ public class ApiFacadeImpl implements ApiFacade {
     }
 
     @Override
-    public String subscribe(String apiCode, Map<String, Object> params, Consumer<Object> listener) {
-        return apiInvokeService.subscribe(apiCode, params, listener);
+    public String subscribe(String apiCode, Long accountId, Map<String, Object> params, Consumer<Object> listener) {
+        return apiInvokeService.subscribe(apiCode, accountId, params, listener);
     }
 
     @Override

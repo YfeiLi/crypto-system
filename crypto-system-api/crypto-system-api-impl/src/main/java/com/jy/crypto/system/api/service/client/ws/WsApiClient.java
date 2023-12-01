@@ -42,7 +42,7 @@ public class WsApiClient {
     /**
      * 订阅
      */
-    public String subscribe(String code, Map<String, Object> params, Consumer<Object> listener) {
+    public String subscribe(String code, Long accountId, Map<String, Object> params, Consumer<Object> listener) {
         WsApiDetail apiDetail = apiReadService.getWsApiDetail(code);
         WsSdkClient sdkClient = sdkClientMap.get(apiDetail.getSdkCode());
         if (sdkClient == null) {

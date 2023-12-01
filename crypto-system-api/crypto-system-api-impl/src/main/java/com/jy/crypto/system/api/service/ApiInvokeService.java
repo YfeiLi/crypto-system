@@ -29,8 +29,8 @@ public class ApiInvokeService {
     /**
      * websocket订阅
      */
-    public String subscribe(String apiCode, Map<String, Object> params, Consumer<Object> listener) {
-        return wsApiClient.subscribe(apiCode, params, listener);
+    public String subscribe(String apiCode, Long accountId, Map<String, Object> params, Consumer<Object> listener) {
+        return wsApiClient.subscribe(apiCode, accountId, params, listener);
     }
 
     /**

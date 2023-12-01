@@ -1,53 +1,60 @@
 package com.jy.crypto.system.api.service.client.http;
 
 import com.jy.crypto.system.api.facade.dto.HttpResult;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
-import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
 
+@Component
 public class HttpCache {
 
-    private static final List<CacheItem> caches = new ArrayList<>();
+    private final Map<CacheKey, CacheEntry> cacheMap = new ConcurrentHashMap<>();
 
-    public static HttpResult get(String code, Long accountId, Map<String, Object> params) {
-        synchronized (caches) {
-            for (CacheItem cache : caches) {
-                Map<String, Object> copyParams = null;
-                if (params != null) {
-                    copyParams = new HashMap<>(params);
-                    for (String ignoreCacheHitParam : cache.ignoreCacheHitParas()) {
-                        copyParams.remove(ignoreCacheHitParam);
-                    }
-                }
-                if (Objects.equals(code, cache.code())
-                        && Objects.equals(accountId, cache.accountId())
-                        && Objects.equals(copyParams, cache.params())) {
-                    if (cache.time().plusNanos(cache.cacheMills() * 1000000).isAfter(OffsetDateTime.now())) {
-                        return cache.httpResult();
-                    } else {
-                        caches.remove(cache);
-                    }
-                }
+    @Scheduled(cron = "0 0/5 * * * ?")
+    public void deleteExpiredCache() {
+        cacheMap.entrySet().removeIf(entry -> entry.getValue().isExpired());
+    }
+
+    public Future<HttpResult> get(String apiCode, Long accountId, Map<String, Object> params) {
+        CacheKey key = new CacheKey(apiCode, accountId, params);
+        CacheEntry entry = cacheMap.get(key);
+        if (entry != null) {
+            if (entry.isExpired()) {
+                cacheMap.remove(key);
+            } else {
+                return entry.getFuture();
             }
-            return null;
+        }
+        return null;
+    }
+
+    public void set(String apiCode, Long accountId, Map<String, Object> params, Future<HttpResult> future, Long cacheMills) {
+        CacheKey key = new CacheKey(apiCode, accountId, params);
+        CacheEntry entry = new CacheEntry(future, System.currentTimeMillis() + cacheMills);
+        cacheMap.put(key, entry);
+    }
+
+    @AllArgsConstructor
+    @Data
+    private static class CacheEntry {
+        private Future<HttpResult> future;
+        private long expiryTime;
+
+        public Boolean isExpired() {
+            return System.currentTimeMillis() > expiryTime;
         }
     }
 
-    public static void set(String code, Long accountId, Map<String, Object> params,
-                           Long cacheMills, String[] ignoreCacheHitParams, HttpResult httpResult) {
-        synchronized(caches) {
-            Map<String, Object> copyParams = new HashMap<>(params);
-            for (String ignoreCacheHitParam : ignoreCacheHitParams) {
-                copyParams.remove(ignoreCacheHitParam);
-            }
-            CacheItem cacheItem = new CacheItem(code, accountId, copyParams,
-                    cacheMills, ignoreCacheHitParams, OffsetDateTime.now(), httpResult);
-            caches.add(cacheItem);
-        }
+    @AllArgsConstructor
+    @Data
+    private static class CacheKey {
+        private String apiCode;
+        private Long accountId;
+        private Map<String, Object> params;
     }
-
-    private record CacheItem(String code, Long accountId, Map<String, Object> params,
-                             Long cacheMills, String[] ignoreCacheHitParas, OffsetDateTime time,
-                             HttpResult httpResult) {}
-
 }
