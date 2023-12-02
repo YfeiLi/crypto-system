@@ -55,23 +55,17 @@ public class HttpApiClient {
     public HttpResult invoke(String code, Long accountId, Map<String, Object> params) {
         // 获取api详情
         HttpApiDetail apiDetail = apiReadService.getHttpApiDetail(code);
-        // 忽略不参与缓存的参数
-        Map<String, Object> paramsForCache = new HashMap<>(params);
-        if (apiDetail.getIgnoreCacheHitParams() != null) {
-            paramsForCache.entrySet().removeIf(entry ->
-                    Arrays.stream(apiDetail.getIgnoreCacheHitParams()).anyMatch(key -> key.equals(entry.getKey())));
-        }
         Future<HttpResult> future = null;
         // 检查缓存
         if (apiDetail.isCache()) {
-            future = httpCache.get(code, accountId, paramsForCache);
+            future = httpCache.get(code, accountId, params);
         }
         if (future == null) {
             // 调用具体实现
             future = CompletableFuture.supplyAsync(() -> invokeImpl(apiDetail, accountId, params));
             // 设置缓存
             if (apiDetail.isCache()) {
-                httpCache.set(code, accountId, paramsForCache, future, apiDetail.getCacheMills());
+                httpCache.set(code, accountId, params, future, apiDetail.getCacheMills());
             }
         }
         // 返回结果，处理Future异常
@@ -91,6 +85,7 @@ public class HttpApiClient {
     /**
      * 请求api具体实现
      */
+    @SuppressWarnings("DuplicatedCode")
     private HttpResult invokeImpl(HttpApiDetail apiDetail, Long accountId, Map<String, Object> params) {
         String code = apiDetail.getCode();
         // 校验参数
@@ -114,7 +109,7 @@ public class HttpApiClient {
         } else if(!apiDetail.getIsGlobal()) {
             throw new BusinessException(ErrorCode.PARAM_ERROR, "accountId required");
         }
-        // 获取sdk客户端
+        // 获取sdk client
         HttpSdkClient sdkClient = sdkClientMap.get(apiDetail.getSdkCode());
         if (sdkClient == null) {
             throw new BusinessException(ErrorCode.DATA_NOT_FOUND, "sdk(code=" + apiDetail.getSdkCode() + ")");
