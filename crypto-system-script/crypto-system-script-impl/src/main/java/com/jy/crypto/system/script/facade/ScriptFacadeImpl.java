@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 @RequiredArgsConstructor
-@Component
+@Component("scriptFacade")
 public class ScriptFacadeImpl implements ScriptFacade {
 
     private final ScriptReadService readService;

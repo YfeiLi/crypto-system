@@ -9,12 +9,14 @@ public class WsSdkConfig {
     @TableId(type = IdType.INPUT)
     private Long id;
     private String sdkCode;
-    private Boolean needPath;
-    private Boolean needEvent;
-    // 订阅处理脚本
-    private Long subscribeHandlerScriptId;
-    // 取消订阅处理脚本
-    private Long unsubscribeHandlerScriptId;
-    // 接收处理脚本
-    private Long receiveHandlerScriptId;
+    // 连接哈希值脚本
+    private Long connectHashCodeScriptId;
+    // url构造脚本
+    private Long urlGenerateScriptId;
+    // 生成订阅消息脚本
+    private Long subscribeMsgGenerateScriptId;
+    // 生成取消订阅消息脚本
+    private Long unsubscribeMsgGenerateScriptId;
+    // 发布路由脚本
+    private Long publishRouterScriptId;
 }

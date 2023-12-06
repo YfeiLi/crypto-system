@@ -15,7 +15,7 @@ public interface ApiFacade {
     /**
      * 订阅 websocket
      */
-    String subscribe(String apiCode, Long accountId, Map<String, Object> params, Consumer<Object> listener);
+    String subscribe(String apiCode, Long accountId, Map<String, Object> params, Consumer<String> consumer);
 
     /**
      * 取消订阅 websocket

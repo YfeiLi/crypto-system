@@ -48,7 +48,7 @@ public class WsApiClient {
      * 订阅
      */
     @SuppressWarnings("DuplicatedCode")
-    public String subscribe(String code, Long accountId, Map<String, Object> params, Consumer<Object> listener) {
+    public String subscribe(String code, Long accountId, Map<String, Object> params, Consumer<String> consumer) {
         WsApiDetail apiDetail = apiReadService.getWsApiDetail(code);
         // 校验参数
         Map<String, String> paramErrors = new HashMap<>();
@@ -77,20 +77,20 @@ public class WsApiClient {
             throw new BusinessException(ErrorCode.DATA_NOT_FOUND, "sdk(code=" + apiDetail.getSdkCode() + ")");
         }
         // 调用sdk client
-        return sdkClient.subscribe(apiDetail, params, account, listener);
+        return sdkClient.subscribe(apiDetail, params, account, consumer);
     }
 
     /**
      * 取消订阅
-     * @param listenerId subscribe方法返回值
+     * @param subscribeId subscribe方法返回值
      */
-    public void unsubscribe(String code, String listenerId) {
+    public void unsubscribe(String code, String subscribeId) {
         WsApiDetail apiDetail = apiReadService.getWsApiDetail(code);
         WsSdkClient sdkClient = sdkClientMap.get(apiDetail.getSdkCode());
         if (sdkClient == null) {
             throw new BusinessException(ErrorCode.DATA_NOT_FOUND, "sdk(code=" + apiDetail.getSdkCode() + ")");
         }
-        sdkClient.unsubscribe(listenerId);
+        sdkClient.unsubscribe(subscribeId);
     }
 
     /**

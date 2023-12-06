@@ -12,6 +12,6 @@ import java.util.Map;
 public class HttpSdkDetail extends ApiSdkListItem {
     private Long timeout;
     private Map<String, String> headers;
-    private Long requestHandlerScriptId;
-    private Long responseHandlerScriptId;
+    private Long requestGenerateScriptId;
+    private Long responseHandleScriptId;
 }

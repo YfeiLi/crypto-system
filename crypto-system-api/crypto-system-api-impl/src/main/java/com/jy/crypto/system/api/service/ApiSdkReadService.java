@@ -89,8 +89,8 @@ public class ApiSdkReadService {
      */
     private HttpSdkDetail covertToHttpSdkDetail(ApiSdk apiSdk, HttpSdkConfig sdkConfig) {
         HttpSdkDetail detail = converter.toHttpDetail(apiSdk);
-        detail.setRequestHandlerScriptId(sdkConfig.getRequestHandlerScriptId());
-        detail.setResponseHandlerScriptId(sdkConfig.getResponseHandlerScriptId());
+        detail.setRequestGenerateScriptId(sdkConfig.getRequestGenerateScriptId());
+        detail.setResponseHandleScriptId(sdkConfig.getResponseHandleScriptId());
         return detail;
     }
 
@@ -136,11 +136,11 @@ public class ApiSdkReadService {
      */
     private WsSdkDetail convertToWsSdkDetail(ApiSdk apiSdk, WsSdkConfig wsSdkConfig) {
         WsSdkDetail sdkDetail = converter.toWsDetail(apiSdk);
-        sdkDetail.setNeedPath(wsSdkConfig.getNeedPath());
-        sdkDetail.setNeedEvent(wsSdkConfig.getNeedEvent());
-        sdkDetail.setSubscribeHandlerScriptId(wsSdkConfig.getSubscribeHandlerScriptId());
-        sdkDetail.setUnsubscribeHandlerScriptId(wsSdkConfig.getSubscribeHandlerScriptId());
-        sdkDetail.setReceiveHandlerScriptId(wsSdkConfig.getReceiveHandlerScriptId());
+        sdkDetail.setConnectHashCodeScriptId(wsSdkConfig.getConnectHashCodeScriptId());
+        sdkDetail.setUrlGenerateScriptId(wsSdkConfig.getUrlGenerateScriptId());
+        sdkDetail.setSubscribeMsgGenerateScriptId(wsSdkConfig.getSubscribeMsgGenerateScriptId());
+        sdkDetail.setUnsubscribeMsgGenerateScriptId(wsSdkConfig.getUnsubscribeMsgGenerateScriptId());
+        sdkDetail.setPublishRouterScriptId(wsSdkConfig.getPublishRouterScriptId());
         return sdkDetail;
     }
 }

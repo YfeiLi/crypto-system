@@ -29,15 +29,15 @@ public class ApiInvokeService {
     /**
      * websocket订阅
      */
-    public String subscribe(String apiCode, Long accountId, Map<String, Object> params, Consumer<Object> listener) {
-        return wsApiClient.subscribe(apiCode, accountId, params, listener);
+    public String subscribe(String apiCode, Long accountId, Map<String, Object> params, Consumer<String> consumer) {
+        return wsApiClient.subscribe(apiCode, accountId, params, consumer);
     }
 
     /**
      * websocket取消订阅
-     * @param listenerId subscribe方法返回值
+     * @param subscribeId subscribe方法返回值
      */
-    public void unsubscribe(String apiCode, String listenerId) {
-        wsApiClient.unsubscribe(apiCode, listenerId);
+    public void unsubscribe(String apiCode, String subscribeId) {
+        wsApiClient.unsubscribe(apiCode, subscribeId);
     }
 }

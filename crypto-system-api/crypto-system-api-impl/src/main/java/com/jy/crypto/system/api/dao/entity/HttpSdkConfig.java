@@ -13,8 +13,8 @@ public class HttpSdkConfig {
     private String sdkCode;
     private Long timeout;
     private Map<String, String> headers;
-    // 请求处理脚本
-    private Long requestHandlerScriptId;
+    // 请求构造脚本
+    private Long requestGenerateScriptId;
     // 响应处理脚本
-    private Long responseHandlerScriptId;
+    private Long responseHandleScriptId;
 }

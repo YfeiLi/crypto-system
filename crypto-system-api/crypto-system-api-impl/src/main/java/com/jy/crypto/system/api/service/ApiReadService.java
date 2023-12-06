@@ -6,11 +6,9 @@ import com.jy.crypto.system.api.convert.ApiConverter;
 import com.jy.crypto.system.api.dao.entity.Api;
 import com.jy.crypto.system.api.dao.entity.ApiParam;
 import com.jy.crypto.system.api.dao.entity.HttpApiConfig;
-import com.jy.crypto.system.api.dao.entity.WsApiConfig;
 import com.jy.crypto.system.api.dao.mapper.ApiMapper;
 import com.jy.crypto.system.api.dao.mapper.HttpApiConfigMapper;
 import com.jy.crypto.system.api.dao.mapper.HttpApiParamMapper;
-import com.jy.crypto.system.api.dao.mapper.WsApiConfigMapper;
 import com.jy.crypto.system.api.dto.ApiListItem;
 import com.jy.crypto.system.api.dto.ApiPageReq;
 import com.jy.crypto.system.api.dto.HttpApiDetail;
@@ -22,7 +20,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -34,7 +31,6 @@ public class ApiReadService {
 
     private final ApiMapper mapper;
     private final HttpApiConfigMapper httpApiConfigMapper;
-    private final WsApiConfigMapper wsApiConfigMapper;
     private final HttpApiParamMapper httpApiParamMapper;
     private final ApiConverter converter;
 
@@ -81,15 +77,9 @@ public class ApiReadService {
         if (api == null) {
             throw new BusinessException(ErrorCode.DATA_NOT_FOUND, "api(code=" + code + ")");
         }
-        WsApiConfig wsApiConfig = wsApiConfigMapper.selectById(api.getId());
-        if (wsApiConfig == null) {
-            throw new BusinessException(ErrorCode.DATA_NOT_FOUND, "api config(code=" + code + ")");
-        }
         List<ApiParam> paramList = httpApiParamMapper.selectList(Wrappers.<ApiParam>lambdaQuery()
                 .eq(ApiParam::getApiId, api.getId()));
         WsApiDetail detail = converter.toWsDetail(api);
-        detail.setPath(wsApiConfig.getPath());
-        detail.setEvent(wsApiConfig.getEvent());
         detail.setParamList(paramList.stream()
                 .map(converter::toDto)
                 .collect(Collectors.toList()));
