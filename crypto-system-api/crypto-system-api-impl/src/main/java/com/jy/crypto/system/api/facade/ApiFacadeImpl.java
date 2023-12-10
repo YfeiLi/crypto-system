@@ -15,13 +15,13 @@ public class ApiFacadeImpl implements ApiFacade {
     private final ApiInvokeService apiInvokeService;
 
     @Override
-    public HttpResult invokeHttp(String apiCode, Long accountId, Map<String, Object> params) {
-        return apiInvokeService.invokeHttp(apiCode, accountId, params);
+    public HttpResult invokeHttp(String apiCode, Map<String, Object> params) {
+        return apiInvokeService.invokeHttp(apiCode, params);
     }
 
     @Override
-    public String subscribe(String apiCode, Long accountId, Map<String, Object> params, Consumer<String> consumer) {
-        return apiInvokeService.subscribe(apiCode, accountId, params, consumer);
+    public String subscribe(String apiCode, Map<String, Object> params, Consumer<String> consumer) {
+        return apiInvokeService.subscribe(apiCode, params, consumer);
     }
 
     @Override

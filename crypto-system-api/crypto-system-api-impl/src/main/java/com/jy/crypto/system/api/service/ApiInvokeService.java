@@ -22,15 +22,15 @@ public class ApiInvokeService {
     /**
      * 调用http api
      */
-    public HttpResult invokeHttp(String apiCode, Long accountId, Map<String, Object> params) {
-        return httpApiClient.invoke(apiCode, accountId, params);
+    public HttpResult invokeHttp(String apiCode, Map<String, Object> params) {
+        return httpApiClient.invoke(apiCode, params);
     }
 
     /**
      * websocket订阅
      */
-    public String subscribe(String apiCode, Long accountId, Map<String, Object> params, Consumer<String> consumer) {
-        return wsApiClient.subscribe(apiCode, accountId, params, consumer);
+    public String subscribe(String apiCode, Map<String, Object> params, Consumer<String> consumer) {
+        return wsApiClient.subscribe(apiCode, params, consumer);
     }
 
     /**

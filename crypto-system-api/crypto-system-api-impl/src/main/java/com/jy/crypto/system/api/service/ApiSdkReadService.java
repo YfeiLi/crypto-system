@@ -89,6 +89,8 @@ public class ApiSdkReadService {
      */
     private HttpSdkDetail covertToHttpSdkDetail(ApiSdk apiSdk, HttpSdkConfig sdkConfig) {
         HttpSdkDetail detail = converter.toHttpDetail(apiSdk);
+        detail.setTimeout(sdkConfig.getTimeout());
+        detail.setHeaders(sdkConfig.getHeaders());
         detail.setRequestGenerateScriptId(sdkConfig.getRequestGenerateScriptId());
         detail.setResponseHandleScriptId(sdkConfig.getResponseHandleScriptId());
         return detail;
@@ -140,7 +142,7 @@ public class ApiSdkReadService {
         sdkDetail.setUrlGenerateScriptId(wsSdkConfig.getUrlGenerateScriptId());
         sdkDetail.setSubscribeMsgGenerateScriptId(wsSdkConfig.getSubscribeMsgGenerateScriptId());
         sdkDetail.setUnsubscribeMsgGenerateScriptId(wsSdkConfig.getUnsubscribeMsgGenerateScriptId());
-        sdkDetail.setPublishRouterScriptId(wsSdkConfig.getPublishRouterScriptId());
+        sdkDetail.setMsgReceiveFilterScriptId(wsSdkConfig.getMsgReceiveFilterScriptId());
         return sdkDetail;
     }
 }

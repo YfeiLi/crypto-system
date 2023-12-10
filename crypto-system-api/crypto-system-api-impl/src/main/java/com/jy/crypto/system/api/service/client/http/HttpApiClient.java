@@ -1,7 +1,5 @@
 package com.jy.crypto.system.api.service.client.http;
 
-import com.jy.crypto.system.account.facade.AccountFacade;
-import com.jy.crypto.system.account.facade.dto.AccountDto;
 import com.jy.crypto.system.api.dto.ApiParamDto;
 import com.jy.crypto.system.api.dto.HttpApiDetail;
 import com.jy.crypto.system.api.dto.HttpSdkDetail;
@@ -16,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +32,6 @@ public class HttpApiClient {
     private final ApplicationContext applicationContext;
     private final ApiReadService apiReadService;
     private final ApiSdkReadService apiSdkReadService;
-    private final AccountFacade accountFacade;
     private final HttpCache httpCache;
 
     /**
@@ -52,20 +48,20 @@ public class HttpApiClient {
     /**
      * 请求api
      */
-    public HttpResult invoke(String code, Long accountId, Map<String, Object> params) {
+    public HttpResult invoke(String code, Map<String, Object> params) {
         // 获取api详情
         HttpApiDetail apiDetail = apiReadService.getHttpApiDetail(code);
         Future<HttpResult> future = null;
         // 检查缓存
         if (apiDetail.isCache()) {
-            future = httpCache.get(code, accountId, params);
+            future = httpCache.get(code, params);
         }
         if (future == null) {
             // 调用具体实现
-            future = CompletableFuture.supplyAsync(() -> invokeImpl(apiDetail, accountId, params));
+            future = CompletableFuture.supplyAsync(() -> invokeImpl(apiDetail, params));
             // 设置缓存
             if (apiDetail.isCache()) {
-                httpCache.set(code, accountId, params, future, apiDetail.getCacheMills());
+                httpCache.set(code, params, future, apiDetail.getCacheMills());
             }
         }
         // 返回结果，处理Future异常
@@ -86,8 +82,7 @@ public class HttpApiClient {
      * 请求api具体实现
      */
     @SuppressWarnings("DuplicatedCode")
-    private HttpResult invokeImpl(HttpApiDetail apiDetail, Long accountId, Map<String, Object> params) {
-        String code = apiDetail.getCode();
+    private HttpResult invokeImpl(HttpApiDetail apiDetail, Map<String, Object> params) {
         // 校验参数
         Map<String, String> paramErrors = new HashMap<>();
         for (ApiParamDto apiParamDto : apiDetail.getParamList()) {
@@ -97,25 +92,13 @@ public class HttpApiClient {
         if (paramErrors.size() > 0) {
             throw new BusinessException(ErrorCode.PARAM_ERROR, paramErrors);
         }
-        // 获取账户详情
-        AccountDto account = null;
-        if (accountId != null) {
-            account = accountFacade.getById(accountId);
-            if (!account.getExchange().equals(apiDetail.getExchange())) {
-                throw new BusinessException(ErrorCode.DATA_INCONSISTENT,
-                        "exchange of account(id=" + accountId + ")",
-                        "exchange of api(code=" + code + ")");
-            }
-        } else if(!apiDetail.getIsGlobal()) {
-            throw new BusinessException(ErrorCode.PARAM_ERROR, "accountId required");
-        }
         // 获取sdk client
         HttpSdkClient sdkClient = sdkClientMap.get(apiDetail.getSdkCode());
         if (sdkClient == null) {
             throw new BusinessException(ErrorCode.DATA_NOT_FOUND, "sdk(code=" + apiDetail.getSdkCode() + ")");
         }
         // 调用sdk client
-        return sdkClient.invoke(apiDetail, params, account);
+        return sdkClient.invoke(apiDetail, params);
     }
 
     /**

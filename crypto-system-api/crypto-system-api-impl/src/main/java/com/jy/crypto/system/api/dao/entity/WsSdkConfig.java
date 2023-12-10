@@ -17,6 +17,6 @@ public class WsSdkConfig {
     private Long subscribeMsgGenerateScriptId;
     // 生成取消订阅消息脚本
     private Long unsubscribeMsgGenerateScriptId;
-    // 发布路由脚本
-    private Long publishRouterScriptId;
+    // 消息接收过滤脚本
+    private Long msgReceiveFilterScriptId;
 }

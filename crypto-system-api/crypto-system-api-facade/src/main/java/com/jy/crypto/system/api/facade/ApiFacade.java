@@ -10,12 +10,12 @@ public interface ApiFacade {
     /**
      * 调用http api
      */
-    HttpResult invokeHttp(String apiCode, Long accountId, Map<String, Object> params);
+    HttpResult invokeHttp(String apiCode, Map<String, Object> params);
 
     /**
      * 订阅 websocket
      */
-    String subscribe(String apiCode, Long accountId, Map<String, Object> params, Consumer<String> consumer);
+    String subscribe(String apiCode, Map<String, Object> params, Consumer<String> consumer);
 
     /**
      * 取消订阅 websocket

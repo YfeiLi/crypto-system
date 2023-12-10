@@ -1,7 +1,5 @@
 package com.jy.crypto.system.api.service.client.ws;
 
-import com.jy.crypto.system.account.facade.AccountFacade;
-import com.jy.crypto.system.account.facade.dto.AccountDto;
 import com.jy.crypto.system.api.dto.WsApiDetail;
 import com.jy.crypto.system.api.dto.WsSdkDetail;
 import com.jy.crypto.system.api.service.ApiReadService;
@@ -27,7 +25,6 @@ public class WsSdkClient {
     private final WsSdkDetail sdkDetail;
     private ApiReadService apiReadService;
     private ScriptFacade scriptFacade;
-    private AccountFacade accountFacade;
     private final Map<Integer, WsConnect> connectMap = new ConcurrentHashMap<>();
     private final Map<SubscribeRecord, List<String>> subscribeMap = new ConcurrentHashMap<>();
 
@@ -45,25 +42,19 @@ public class WsSdkClient {
         this.scriptFacade = scriptFacade;
     }
 
-    @Autowired
-    public void setAccountFacade(AccountFacade accountFacade) {
-        this.accountFacade = accountFacade;
-    }
-
     /**
      * 订阅
      */
-    public String subscribe(WsApiDetail apiDetail, Map<String, Object> params, AccountDto account,
-                            Consumer<String> consumer) {
+    public String subscribe(WsApiDetail apiDetail, Map<String, Object> params, Consumer<String> consumer) {
         // 生成订阅id
         String subscribeId = UUID.randomUUID().toString().replace("-", "");
         // 获取连接
-        WsConnect connect = getConnect(apiDetail, params, account);
+        WsConnect connect = getConnect(apiDetail, params);
         // 为连接添加消费者
-        connect.addConsumer(msg -> handleReceivedMsg(apiDetail, params, account, msg, consumer), subscribeId);
+        connect.addConsumer(msg -> handleReceivedMsg(apiDetail, params, msg, consumer), subscribeId);
         // 如果有订阅消息脚本，则发送订阅消息
         if (sdkDetail.getSubscribeMsgGenerateScriptId() != null) {
-            sendSubscribeMsg(apiDetail, params, account, subscribeId, connect);
+            sendSubscribeMsg(apiDetail, params, subscribeId, connect);
         }
         return subscribeId;
     }
@@ -94,11 +85,11 @@ public class WsSdkClient {
     /**
      * 获取连接
      */
-    private WsConnect getConnect(WsApiDetail apiDetail, Map<String, Object> params, AccountDto account) {
+    private WsConnect getConnect(WsApiDetail apiDetail, Map<String, Object> params) {
         // 调用脚本获取连接哈希值
         Map<String, Object> connectHashCodeVariables = Map.of(
                 "api", apiDetail, "sdk", sdkDetail,
-                "account", account, "params", params);
+                "params", params);
         Object connectHashCodeScriptResult = scriptFacade
                 .execute(sdkDetail.getConnectHashCodeScriptId(), connectHashCodeVariables);
         if (!(connectHashCodeScriptResult instanceof Integer connectHashCode)) {
@@ -108,7 +99,7 @@ public class WsSdkClient {
             // 调用脚本生成url
             Map<String, Object> subscribeHandlerVariables = Map.of(
                     "api", apiDetail, "sdk", sdkDetail,
-                    "account", account, "params", params);
+                    "params", params);
             Object urlGenerateScriptResult = scriptFacade
                     .execute(sdkDetail.getUrlGenerateScriptId(), subscribeHandlerVariables);
             if (!(urlGenerateScriptResult instanceof String url)) {
@@ -125,15 +116,15 @@ public class WsSdkClient {
     /**
      * 发送订阅消息
      */
-    private void sendSubscribeMsg(WsApiDetail apiDetail, Map<String, Object> params, AccountDto account,
+    private void sendSubscribeMsg(WsApiDetail apiDetail, Map<String, Object> params,
                                   String subscribeId, WsConnect connect) {
-        SubscribeRecord subscribeRecord = new SubscribeRecord(apiDetail.getCode(), account.getId(), params);
+        SubscribeRecord subscribeRecord = new SubscribeRecord(apiDetail.getCode(), params);
         // 判断是否发送过订阅消息
         if (subscribeMap.get(subscribeRecord) == null) {
             // 调用脚本获取订阅消息
             Map<String, Object> subscribeMsgGenerateVariables = Map.of(
                     "api", apiDetail, "sdk", sdkDetail,
-                    "account", account, "params", params);
+                    "params", params);
             Object subscribeMsgGenerateScriptResult = scriptFacade
                     .execute(sdkDetail.getSubscribeMsgGenerateScriptId(), subscribeMsgGenerateVariables);
             if (!(subscribeMsgGenerateScriptResult instanceof String subscribeMsg)) {
@@ -166,12 +157,10 @@ public class WsSdkClient {
         if (subscribeMap.get(subscribeRecord).isEmpty()) {
             // 获取apiDetail
             WsApiDetail apiDetail = apiReadService.getWsApiDetail(subscribeRecord.apiCode());
-            // 获取account
-            AccountDto account = accountFacade.getById(subscribeRecord.accountId());
             // 调用脚本获取取消订阅消息
             Map<String, Object> unsubscribeMsgGenerateVariables = Map.of(
                     "api", apiDetail, "sdk", sdkDetail,
-                    "account", account, "params", subscribeRecord.params());
+                    "params", subscribeRecord.params());
             Object unsubscribeMsgGenerateScriptResult = scriptFacade
                     .execute(sdkDetail.getUnsubscribeMsgGenerateScriptId(), unsubscribeMsgGenerateVariables);
             if (!(unsubscribeMsgGenerateScriptResult instanceof String unsubscribeMsg)) {
@@ -190,17 +179,17 @@ public class WsSdkClient {
     }
 
     /**
-     * 处理消息
+     * 处理接收的消息
      */
-    private void handleReceivedMsg(WsApiDetail apiDetail, Map<String, Object> params, AccountDto account,
+    private void handleReceivedMsg(WsApiDetail apiDetail, Map<String, Object> params,
                                    String msg, Consumer<String> consumer) {
-        if (sdkDetail.getPublishRouterScriptId() != null) {
+        if (sdkDetail.getMsgReceiveFilterScriptId() != null) {
             // 调用脚本获取订阅消息
-            Map<String, Object> publishRouterVariables = Map.of(
+            Map<String, Object> msgReceiveFilterVariables = Map.of(
                     "api", apiDetail, "sdk", sdkDetail,
-                    "account", account, "params", params);
+                    "params", params, "message", msg);
             Object publishRouterScriptResult = scriptFacade
-                    .execute(sdkDetail.getPublishRouterScriptId(), publishRouterVariables);
+                    .execute(sdkDetail.getMsgReceiveFilterScriptId(), msgReceiveFilterVariables);
             if (!(publishRouterScriptResult instanceof Boolean publishRouterResult)) {
                 throw new BusinessException(ErrorCode.SCRIPT_RESULT_TYPE_ERROR,
                         sdkDetail.getSubscribeMsgGenerateScriptId());
@@ -212,5 +201,5 @@ public class WsSdkClient {
         consumer.accept(msg);
     }
 
-    private record SubscribeRecord(String apiCode, Long accountId, Map<String, Object> params) {}
+    private record SubscribeRecord(String apiCode, Map<String, Object> params) {}
 }

@@ -1,8 +1,6 @@
 package com.jy.crypto.system.api.service.client.http;
 
 import com.jy.crypto.system.api.facade.dto.HttpResult;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -20,41 +18,30 @@ public class HttpCache {
         cacheMap.entrySet().removeIf(entry -> entry.getValue().isExpired());
     }
 
-    public Future<HttpResult> get(String apiCode, Long accountId, Map<String, Object> params) {
-        CacheKey key = new CacheKey(apiCode, accountId, params);
+    public Future<HttpResult> get(String apiCode, Map<String, Object> params) {
+        CacheKey key = new CacheKey(apiCode, params);
         CacheEntry entry = cacheMap.get(key);
         if (entry != null) {
             if (entry.isExpired()) {
                 cacheMap.remove(key);
             } else {
-                return entry.getFuture();
+                return entry.future();
             }
         }
         return null;
     }
 
-    public void set(String apiCode, Long accountId, Map<String, Object> params, Future<HttpResult> future, Long cacheMills) {
-        CacheKey key = new CacheKey(apiCode, accountId, params);
+    public void set(String apiCode, Map<String, Object> params, Future<HttpResult> future, Long cacheMills) {
+        CacheKey key = new CacheKey(apiCode, params);
         CacheEntry entry = new CacheEntry(future, System.currentTimeMillis() + cacheMills);
         cacheMap.put(key, entry);
     }
 
-    @AllArgsConstructor
-    @Data
-    private static class CacheEntry {
-        private Future<HttpResult> future;
-        private long expiryTime;
-
+    private record CacheEntry(Future<HttpResult> future, long expiryTime) {
         public Boolean isExpired() {
             return System.currentTimeMillis() > expiryTime;
         }
     }
 
-    @AllArgsConstructor
-    @Data
-    private static class CacheKey {
-        private String apiCode;
-        private Long accountId;
-        private Map<String, Object> params;
-    }
+    private record CacheKey(String apiCode, Map<String, Object> params) {}
 }

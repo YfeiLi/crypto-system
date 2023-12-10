@@ -61,7 +61,6 @@ public class ApiReadService {
         detail.setPath(httpApiConfig.getPath());
         detail.setMethod(httpApiConfig.getMethod());
         detail.setCacheMills(httpApiConfig.getCacheMills());
-        detail.setIgnoreCacheHitParams(httpApiConfig.getIgnoreCacheHitParams());
         detail.setParamList(paramList.stream()
                 .map(converter::toDto)
                 .collect(Collectors.toList()));

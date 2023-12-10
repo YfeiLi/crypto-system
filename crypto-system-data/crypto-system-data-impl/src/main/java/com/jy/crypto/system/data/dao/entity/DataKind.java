@@ -1,16 +1,19 @@
-package com.jy.crypto.system.account.dao.entity;
+package com.jy.crypto.system.data.dao.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.jy.crypto.system.data.facade.enums.DataType;
 import lombok.Data;
 
 import java.time.OffsetDateTime;
 
 @Data
-public class Account {
+public class DataKind {
     @TableId(type = IdType.AUTO)
     private Long id;
-    private String name;
-    private String exchange;
+    private String code;
+    private String description;
+    private DataType type;
+    private Long initScriptId;
     @OrderBy
     @TableField(fill = FieldFill.INSERT)
     private OffsetDateTime createTime;

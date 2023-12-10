@@ -1,6 +1,6 @@
 package com.jy.crypto.system.api.service.client.http;
 
-import com.jy.crypto.system.account.facade.dto.AccountDto;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.jy.crypto.system.api.dto.HttpApiDetail;
 import com.jy.crypto.system.api.dto.HttpSdkDetail;
 import com.jy.crypto.system.api.facade.dto.HttpResult;
@@ -15,8 +15,8 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 @Scope("prototype")
@@ -39,11 +39,14 @@ public class HttpSdkClient {
         this.scriptFacade = scriptFacade;
     }
 
-    public HttpResult invoke(HttpApiDetail apiDetail, Map<String, Object> params, AccountDto account) {
+    /**
+     * 调用
+     */
+    public HttpResult invoke(HttpApiDetail apiDetail, Map<String, Object> params) {
         // 调用脚本获取请求
         Map<String, Object> requestGenerateVariables = Map.of(
                 "api", apiDetail, "sdk", sdkDetail,
-                "account", account, "params", params);
+                "params", params);
         Object requestGenerateScriptResult = scriptFacade.execute(sdkDetail.getRequestGenerateScriptId(), requestGenerateVariables);
         Request request = organizeRequest(apiDetail.getMethod(), requestGenerateScriptResult);
         // 调用okHttpClient
@@ -51,8 +54,14 @@ public class HttpSdkClient {
             // 调用脚本获取结果
             Map<String, Object> responseHandleVariables = Map.of(
                     "api", apiDetail, "sdk", sdkDetail,
-                    "account", account, "params", params,
-                    "response", response);
+                    "params", params, "response", Map.of(
+                            "code", response.code(),
+                            "headers", response.headers().toMultimap().entrySet().stream()
+                                    .collect(Collectors.toMap(Map.Entry::getKey, entry ->
+                                            entry.getValue().stream().reduce((a, b) ->
+                                                    String.join(",", a, b)))),
+                            "body", response.body() == null ? "" : response.body().string()
+                    ));
             Object responseHandleScriptResult = scriptFacade.execute(sdkDetail.getResponseHandleScriptId(), responseHandleVariables);
             return organizeResult(responseHandleScriptResult);
         } catch (IOException e) {
@@ -74,6 +83,19 @@ public class HttpSdkClient {
     private void customizedOkHttpClient(OkHttpClient.Builder builder, HttpSdkDetail sdkDetail) {
         if (sdkDetail.getTimeout() != null && sdkDetail.getTimeout() != 0) {
             builder.callTimeout(Duration.ofSeconds(sdkDetail.getTimeout()));
+            builder.addInterceptor(chain -> {
+                Request originalRequest = chain.request();
+                Request.Builder requestBuilder = originalRequest.newBuilder();
+                if (sdkDetail.getHeaders() != null) {
+                    for (String key : sdkDetail.getHeaders().keySet()) {
+                        if (StringUtils.isEmpty(originalRequest.header(key))) {
+                            String value = sdkDetail.getHeaders().get(key);
+                            requestBuilder.header(key, value);
+                        }
+                    }
+                }
+                return chain.proceed(requestBuilder.build());
+            });
         }
     }
 

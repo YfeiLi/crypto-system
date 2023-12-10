@@ -15,6 +15,4 @@ public class HttpApiConfig {
     private String path;
     private HttpMethod method;
     private Long cacheMills;
-    @TableField(typeHandler = JacksonTypeHandler.class)
-    private String[] ignoreCacheHitParams;
 }

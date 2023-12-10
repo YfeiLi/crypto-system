@@ -1,7 +1,5 @@
 package com.jy.crypto.system.api.service.client.ws;
 
-import com.jy.crypto.system.account.facade.AccountFacade;
-import com.jy.crypto.system.account.facade.dto.AccountDto;
 import com.jy.crypto.system.api.dto.ApiParamDto;
 import com.jy.crypto.system.api.dto.WsApiDetail;
 import com.jy.crypto.system.api.dto.WsSdkDetail;
@@ -31,7 +29,6 @@ public class WsApiClient {
     private final ApplicationContext applicationContext;
     private final ApiReadService apiReadService;
     private final ApiSdkReadService apiSdkReadService;
-    private final AccountFacade accountFacade;
 
     /**
      * 初始化sdk
@@ -48,7 +45,7 @@ public class WsApiClient {
      * 订阅
      */
     @SuppressWarnings("DuplicatedCode")
-    public String subscribe(String code, Long accountId, Map<String, Object> params, Consumer<String> consumer) {
+    public String subscribe(String code, Map<String, Object> params, Consumer<String> consumer) {
         WsApiDetail apiDetail = apiReadService.getWsApiDetail(code);
         // 校验参数
         Map<String, String> paramErrors = new HashMap<>();
@@ -59,25 +56,13 @@ public class WsApiClient {
         if (paramErrors.size() > 0) {
             throw new BusinessException(ErrorCode.PARAM_ERROR, paramErrors);
         }
-        // 获取账户详情
-        AccountDto account = null;
-        if (accountId != null) {
-            account = accountFacade.getById(accountId);
-            if (!account.getExchange().equals(apiDetail.getExchange())) {
-                throw new BusinessException(ErrorCode.DATA_INCONSISTENT,
-                        "exchange of account(id=" + accountId + ")",
-                        "exchange of api(code=" + code + ")");
-            }
-        } else if(!apiDetail.getIsGlobal()) {
-            throw new BusinessException(ErrorCode.PARAM_ERROR, "accountId required");
-        }
         // 获取sdk client
         WsSdkClient sdkClient = sdkClientMap.get(apiDetail.getSdkCode());
         if (sdkClient == null) {
             throw new BusinessException(ErrorCode.DATA_NOT_FOUND, "sdk(code=" + apiDetail.getSdkCode() + ")");
         }
         // 调用sdk client
-        return sdkClient.subscribe(apiDetail, params, account, consumer);
+        return sdkClient.subscribe(apiDetail, params, consumer);
     }
 
     /**
